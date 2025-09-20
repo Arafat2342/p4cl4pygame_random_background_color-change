@@ -9,7 +9,6 @@ pygame.display.set_caption('Sprite Game')
 clock = pygame.time.Clock()
 score = 0
 font = pygame.font.SysFont('Sans serif', 35)
-text_rect = pygame.Rect(10, 10, 0, 0)  # Placeholder, will update size after rendering
 
 bg_colors = [(0, 0, 0), (20, 40, 60), (60, 20, 40), (40, 60, 20)]
 bg_index = randint(0, 3)
@@ -98,6 +97,7 @@ particles = []
 
 running = True
 text = font.render(f'Score: {score}', True, ('#f4f4f9'))
+text_rect = text.get_rect(topleft=(10,10)) 
 
 while running:
     for e in pygame.event.get():
