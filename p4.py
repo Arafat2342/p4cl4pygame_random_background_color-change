@@ -7,6 +7,9 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 500, 500
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Sprite Game')
 clock = pygame.time.Clock()
+score = 0
+font = pygame.font.SysFont('Sans serif', 35)
+text_rect = pygame.Rect(10, 10, 0, 0)  # Placeholder, will update size after rendering
 
 bg_colors = [(0, 0, 0), (20, 40, 60), (60, 20, 40), (40, 60, 20)]
 bg_index = randint(0, 3)
@@ -47,7 +50,11 @@ class Sprite(pygame.sprite.Sprite):
         diameter = radius * 2
 
         self.image = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, pygame.Color(color), (radius, radius), radius)
+        try:
+            draw_color = pygame.Color(color)
+        except ValueError:
+            draw_color = pygame.Color('white')
+        pygame.draw.circle(self.image, draw_color, (radius, radius), radius)
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -55,7 +62,10 @@ class Sprite(pygame.sprite.Sprite):
         self.glow = self._make_glow_surface(color, glow_size)
 
     def _make_glow_surface(self, color, glow_size):
-        c = pygame.Color(color)
+        try:
+            c = pygame.Color(color)
+        except ValueError:
+            c = pygame.Color('white')
         diameter = self.radius * 2
         gw, gh = diameter + glow_size * 2, diameter + glow_size * 2
         surf = pygame.Surface((gw, gh), pygame.SRCALPHA)
@@ -87,6 +97,7 @@ all_sprites_list.add(sp1, sp2)
 particles = []
 
 running = True
+text = font.render(f'Score: {score}', True, ('#f4f4f9'))
 
 while running:
     for e in pygame.event.get():
@@ -99,7 +110,7 @@ while running:
     sp1.player_control(x_change, y_change)
 
     if x_change != 0 or y_change != 0:
-        for _ in range(2): 
+        for _ in range(2):
             particles.append(Particle(sp1.rect.centerx, sp1.rect.centery, sp1.color))
 
     screen.fill(bg_colors[bg_index])
@@ -116,11 +127,14 @@ while running:
 
     if pygame.sprite.collide_mask(sp1, sp2):
         print("Boom!")
+        score += 1
+        text = font.render(f'Score: {score}', True, ('#f4f4f9'))
         bg_index = (bg_index + 1) % len(bg_colors)
         sp2.rect.x, sp2.rect.y = randint(0, SCREEN_WIDTH - sp2.rect.width), randint(0, SCREEN_HEIGHT - sp2.rect.height)
         while pygame.sprite.collide_mask(sp1, sp2):
              sp2.rect.x, sp2.rect.y = randint(0, SCREEN_WIDTH - sp2.rect.width), randint(0, SCREEN_HEIGHT - sp2.rect.height)
 
+    screen.blit(text, text_rect)
     pygame.display.flip()
     clock.tick(60)
 
